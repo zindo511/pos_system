@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import java.net.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane prefHeight="600.0" prefWidth="1250.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.pos.controller.LoginController">
+    <stylesheets>
+        <URL value="@../styles/login-style.css"/>
+    </stylesheets>
+    <children>
+        <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                    AnchorPane.topAnchor="0.0">
+            <left>
+                <VBox alignment="CENTER" prefHeight="600.0" prefWidth="708.0" spacing="20" styleClass="left-panel"
+                      BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0"/>
+                    </padding>
+                    <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308"
+                               prefHeight="76.0" prefWidth="498.0" styleClass="team-label" text="KEEP CALM"
+                               textFill="WHITE" wrapText="true"/>
+                        <Label text="XIN CHÀO BẠN" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="53.0"/>
+                            </font>
+                        </Label>
+                    </children>
+                </VBox>
+            </left>
+            <center>
+                <VBox alignment="CENTER" prefHeight="600.0" prefWidth="492.0" spacing="30" styleClass="right-panel"
+                      BorderPane.alignment="CENTER">
+                    <padding>
+                        <Insets bottom="60.0" left="60.0" right="60.0" top="60.0"/>
+                    </padding>
+                    <children>
+                        <Label maxWidth="1.7976931348623157E308" styleClass="login-title" text="ĐĂNG NHẬP"
+                               wrapText="true"/>
+
+                        <TextField fx:id="userName" maxWidth="1.7976931348623157E308" promptText="Tài khoản"
+                                   styleClass="login-field"/>
+
+                        <StackPane maxWidth="1.7976931348623157E308" styleClass="password-stack-pane">
+                            <children>
+                                <TextField fx:id="passwordText" promptText="Mật khẩu" styleClass="password-text-field"/>
+                                <PasswordField fx:id="password" promptText="Mật khẩu" styleClass="password-field"/>
+                            </children>
+                        </StackPane>
+
+                        <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308">
+                            <children>
+                                <CheckBox fx:id="showPasswordCheckBox" mnemonicParsing="false"
+                                          styleClass="password-checkbox" text="Hiển thị mật khẩu"/>
+                            </children>
+                        </HBox>
+
+                        <Button fx:id="loginButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                                styleClass="login-button" text="Đăng nhập"/>
+
+                        <HBox alignment="CENTER" maxWidth="1.7976931348623157E308" spacing="20">
+                            <children>
+                                <Button fx:id="forgetPasswordButton" mnemonicParsing="false"
+                                        styleClass="secondary-button" text="Quên mật khẩu"/>
+                                <Button fx:id="registerButton" mnemonicParsing="false" styleClass="secondary-button"
+                                        text="Đăng ký"/>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </center>
+        </BorderPane>
+    </children>
+</AnchorPane>

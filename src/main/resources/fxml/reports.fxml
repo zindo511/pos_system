@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.chart.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="678.0"
+            prefWidth="1320.0" styleClass="border-pane" stylesheets="@../styles/tmp-style.css"
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+
+    <top>
+        <HBox prefHeight="52.0" prefWidth="1301.0" styleClass="header-box" BorderPane.alignment="CENTER">
+            <children>
+                <Label styleClass="main-title" text="BÁO CÁO DOANH THU HÀNG THÁNG"/>
+            </children>
+        </HBox>
+    </top>
+
+    <left>
+        <VBox alignment="TOP_CENTER" prefHeight="573.0" prefWidth="196.0" styleClass="sidebar-vbox"
+              BorderPane.alignment="CENTER">
+            <children>
+                <Button alignment="CENTER" mnemonicParsing="false" prefHeight="39.0" prefWidth="132.0"
+                        styleClass="sidebar-button" text="Bán hàng"/>
+                <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="130.0" styleClass="sidebar-button"
+                        text="Quản lý sản phẩm"/>
+                <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="142.0" styleClass="sidebar-button"
+                        text="Báo cáo"/>
+                <Region styleClass="spacer-region" VBox.vgrow="ALWAYS"/>
+                <Button mnemonicParsing="false" prefHeight="37.0" prefWidth="128.0" styleClass="logout-button"
+                        text="Đăng xuất"/>
+            </children>
+        </VBox>
+    </left>
+
+    <center>
+        <BorderPane prefHeight="498.0" prefWidth="1105.0" styleClass="content-border-pane"
+                    BorderPane.alignment="CENTER">
+
+            <top>
+                <HBox alignment="CENTER_RIGHT" prefHeight="68.0" prefWidth="1105.0" styleClass="toolbar-box"
+                      BorderPane.alignment="CENTER">
+                    <children>
+                        <Button mnemonicParsing="false" styleClass="export-button" text="Xuất báo cáo"/>
+                    </children>
+                </HBox>
+            </top>
+
+            <center>
+                <HBox prefHeight="101.0" prefWidth="1105.0" styleClass="profit-stats-box" BorderPane.alignment="CENTER">
+                    <children>
+                        <VBox alignment="TOP_CENTER" prefHeight="67.0" prefWidth="344.0" styleClass="profit-card">
+                            <children>
+                                <Label styleClass="profit-label" text="Lợi nhuận tháng trước"/>
+                                <TextField alignment="CENTER" disable="true" editable="false"
+                                           styleClass="profit-field last-month" text="₫15,230,000"/>
+                            </children>
+                        </VBox>
+                        <VBox alignment="TOP_CENTER" prefHeight="67.0" prefWidth="379.0" styleClass="profit-card">
+                            <children>
+                                <Label styleClass="profit-label" text="Lợi nhuận tháng này"/>
+                                <TextField alignment="CENTER" disable="true" editable="false"
+                                           styleClass="profit-field current-month" text="₫18,450,000"/>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </center>
+
+            <bottom>
+                <VBox prefHeight="438.0" prefWidth="1105.0" styleClass="chart-container" BorderPane.alignment="CENTER">
+                    <children>
+                        <HBox prefHeight="120.0" prefWidth="1105.0" styleClass="chart-header">
+                            <children>
+                                <Label styleClass="chart-title" text="Biểu đồ thu - chi - lợi nhuận hàng tháng"/>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </bottom>
+        </BorderPane>
+    </center>
+</BorderPane>
