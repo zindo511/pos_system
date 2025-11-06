@@ -10,12 +10,18 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.StringConverter;
 
 import java.text.NumberFormat;
 import java.util.Locale;
 
+/**
+ * Controller quản lý giao diện sản phẩm (Product Management)
+ * Chức năng: thêm, sửa, xóa, tìm kiếm, hiển thị danh sách sản phẩm
+ */
 public class ProductController {
 
+    // ======================== KHAI BÁO FXML ========================
     @FXML
     private TextField searchField;
     @FXML
@@ -40,21 +46,45 @@ public class ProductController {
     @FXML
     private TableColumn<Product, Integer> colStock;
 
-    private ProductDAO productDAO = new ProductDAO();
-    private CategoryDAO categoryDAO = new CategoryDAO();
-    private ObservableList<Product> productList = FXCollections.observableArrayList();
-    private Product selectedProduct = null;
+    // ======================== BIẾN DÙNG CHUNG ========================
+    private final ProductDAO productDAO = new ProductDAO();
+    private final CategoryDAO categoryDAO = new CategoryDAO();
+    private final ObservableList<Product> productList = FXCollections.observableArrayList();
+    private Product selectedProduct;
 
+    // ======================== KHỞI TẠO ========================
     @FXML
     private void initialize() {
-        // Setup table columns
+        setupTableColumns();
+        setupPriceFormat();
+        loadCategories();
+        loadProducts();
+
+        // Khi chọn 1 sản phẩm trong bảng
+        productTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            if (newSel != null) {
+                selectedProduct = newSel;
+                fillForm(newSel);
+            }
+        });
+
+        // Mặc định chọn danh mục đầu tiên
+        if (!categoryCombo.getItems().isEmpty()) {
+            categoryCombo.getSelectionModel().selectFirst();
+        }
+    }
+
+    // ======================== CẤU HÌNH BẢNG ========================
+    private void setupTableColumns() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colCategory.setCellValueFactory(new PropertyValueFactory<>("categoryName"));
         colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
         colStock.setCellValueFactory(new PropertyValueFactory<>("stock"));
+    }
 
-        // Format price column
+    private void setupPriceFormat() {
+        // Hiển thị giá có định dạng ###.### đ
         colPrice.setCellFactory(column -> new TableCell<Product, Double>() {
             @Override
             protected void updateItem(Double price, boolean empty) {
@@ -67,30 +97,14 @@ public class ProductController {
                 }
             }
         });
-
-        // Load categories
-        loadCategories();
-
-        // Load products
-        loadProducts();
-
-        // Selection listener
-        productTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                selectedProduct = newSelection;
-                fillForm(newSelection);
-            }
-        });
-
-        // Set default payment method
-        if (categoryCombo.getItems().size() > 0) {
-            categoryCombo.getSelectionModel().selectFirst();
-        }
     }
 
+    // ======================== NẠP DỮ LIỆU ========================
     private void loadCategories() {
-        categoryCombo.setItems(FXCollections.observableArrayList(categoryDAO.getAllCategories()));
-        categoryCombo.setConverter(new javafx.util.StringConverter<Category>() {
+        ObservableList<Category> categories = FXCollections.observableArrayList(categoryDAO.getAllCategories());
+        categoryCombo.setItems(categories);
+
+        categoryCombo.setConverter(new StringConverter<>() {
             @Override
             public String toString(Category category) {
                 return category != null ? category.getName() : "";
@@ -104,34 +118,42 @@ public class ProductController {
     }
 
     private void loadProducts() {
-        productList.clear();
-        productList.addAll(productDAO.getAllProducts());
+        productList.setAll(productDAO.getAllProducts());
         productTable.setItems(productList);
     }
 
+    // ======================== FORM ========================
     private void fillForm(Product product) {
         productNameField.setText(product.getName());
         priceField.setText(String.valueOf(product.getPrice()));
         stockField.setText(String.valueOf(product.getStock()));
 
-        // Select category
-        for (Category cat : categoryCombo.getItems()) {
-            if (cat.getId() == product.getCategoryId()) {
-                categoryCombo.getSelectionModel().select(cat);
-                break;
-            }
-        }
+        categoryCombo.getItems().stream()
+                .filter(cat -> cat.getId() == product.getCategoryId())
+                .findFirst()
+                .ifPresent(cat -> categoryCombo.getSelectionModel().select(cat));
     }
 
+    @FXML
+    private void handleClear() {
+        productNameField.clear();
+        priceField.clear();
+        stockField.clear();
+        if (!categoryCombo.getItems().isEmpty()) {
+            categoryCombo.getSelectionModel().selectFirst();
+        }
+        selectedProduct = null;
+        productTable.getSelectionModel().clearSelection();
+    }
+
+    // ======================== CHỨC NĂNG ========================
     @FXML
     private void handleSearch() {
         String keyword = searchField.getText().trim();
         if (keyword.isEmpty()) {
             loadProducts();
         } else {
-            productList.clear();
-            productList.addAll(productDAO.searchProducts(keyword));
-            productTable.setItems(productList);
+            productList.setAll(productDAO.searchProducts(keyword));
         }
     }
 
@@ -146,11 +168,38 @@ public class ProductController {
     private void handleAdd() {
         if (!validateInput()) return;
 
+        String name = productNameField.getText().trim();
+        int categoryId = categoryCombo.getValue().getId();
+        double price = Double.parseDouble(priceField.getText().trim());
+        int stock = Integer.parseInt(stockField.getText().trim());
+
+        // Kiểm tra xem có sản phẩm trùng (tên, danh mục, giá)
+        Product existing = productDAO.getAllProducts().stream()
+                .filter(p -> p.getName().equalsIgnoreCase(name)
+                        && p.getCategoryId() == categoryId
+                        && Double.compare(p.getPrice(), price) == 0)
+                .findFirst()
+                .orElse(null);
+
+        if (existing != null) {
+            // Gộp tồn kho
+            existing.setStock(existing.getStock() + stock);
+            if (productDAO.updateProduct(existing)) {
+                AlertHelper.showInfo("Thành công", "Sản phẩm đã tồn tại — đã gộp tồn kho!");
+                loadProducts();
+                handleClear();
+            } else {
+                AlertHelper.showError("Lỗi", "Không thể gộp tồn kho!");
+            }
+            return;
+        }
+
+        // Nếu chưa có thì thêm mới
         Product product = new Product();
-        product.setName(productNameField.getText().trim());
-        product.setCategoryId(categoryCombo.getValue().getId());
-        product.setPrice(Double.parseDouble(priceField.getText().trim()));
-        product.setStock(Integer.parseInt(stockField.getText().trim()));
+        product.setName(name);
+        product.setCategoryId(categoryId);
+        product.setPrice(price);
+        product.setStock(stock);
 
         if (productDAO.addProduct(product)) {
             AlertHelper.showInfo("Thành công", "Thêm sản phẩm thành công!");
@@ -160,6 +209,7 @@ public class ProductController {
             AlertHelper.showError("Lỗi", "Không thể thêm sản phẩm!");
         }
     }
+
 
     @FXML
     private void handleUpdate() {
@@ -202,18 +252,7 @@ public class ProductController {
         }
     }
 
-    @FXML
-    private void handleClear() {
-        productNameField.clear();
-        priceField.clear();
-        stockField.clear();
-        if (categoryCombo.getItems().size() > 0) {
-            categoryCombo.getSelectionModel().selectFirst();
-        }
-        selectedProduct = null;
-        productTable.getSelectionModel().clearSelection();
-    }
-
+    // ======================== KIỂM TRA DỮ LIỆU ========================
     private boolean validateInput() {
         if (productNameField.getText().trim().isEmpty()) {
             AlertHelper.showWarning("Cảnh báo", "Vui lòng nhập tên sản phẩm!");

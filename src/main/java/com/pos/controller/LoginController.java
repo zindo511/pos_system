@@ -14,35 +14,67 @@ import javafx.stage.Stage;
 public class LoginController {
 
     @FXML
-    private TextField usernameField;
+    private TextField userName;
+
     @FXML
-    private PasswordField passwordField;
+    private PasswordField password;
+
+    @FXML
+    private TextField passwordText;
+
+    @FXML
+    private CheckBox showPasswordCheckBox;
+
     @FXML
     private Button loginButton;
-    @FXML
-    private Label messageLabel;
 
     private EmployeeDAO employeeDAO = new EmployeeDAO();
 
     @FXML
     private void initialize() {
+        // Ban đầu ẩn TextField hiển thị password
+        passwordText.setVisible(false);
+        passwordText.setManaged(false);
+
+        // Bind text giữa PasswordField và TextField
+        passwordText.textProperty().bindBidirectional(password.textProperty());
+
+        // Xử lý checkbox hiển thị mật khẩu
+        showPasswordCheckBox.setOnAction(event -> {
+            if (showPasswordCheckBox.isSelected()) {
+                passwordText.setVisible(true);
+                passwordText.setManaged(true);
+                password.setVisible(false);
+                password.setManaged(false);
+            } else {
+                passwordText.setVisible(false);
+                passwordText.setManaged(false);
+                password.setVisible(true);
+                password.setManaged(true);
+            }
+        });
+
         // Enter key để login
-        passwordField.setOnAction(event -> handleLogin());
+        password.setOnAction(event -> handleLogin());
+        passwordText.setOnAction(event -> handleLogin());
+
+        // Bind action cho nút đăng nhập
+        loginButton.setOnAction(event -> handleLogin());
     }
 
     @FXML
     private void handleLogin() {
-        String username = usernameField.getText().trim();
-        String password = passwordField.getText().trim();
+        String username = userName.getText().trim();
+        String passwordValue = password.getText().trim();
 
         // Validation
-        if (username.isEmpty() || password.isEmpty()) {
-            messageLabel.setText("Vui lòng nhập đầy đủ thông tin!");
+        if (username.isEmpty() || passwordValue.isEmpty()) {
+            AlertHelper.showWarning("Cảnh báo", "Vui lòng nhập đầy đủ thông tin!");
             return;
         }
 
         // Kiểm tra đăng nhập
-        Employee employee = employeeDAO.login(username, password);
+        Employee employee = employeeDAO.login(username, passwordValue);
 
         if (employee != null) {
             // Lưu thông tin user vào session
@@ -61,11 +93,11 @@ public class LoginController {
 
             } catch (Exception e) {
                 e.printStackTrace();
-//                AlertHelper.showError("Lỗi", "Không thể mở màn hình chính!");
+                AlertHelper.showError("Lỗi", "Không thể mở màn hình chính!");
             }
 
         } else {
-            messageLabel.setText("Sai tên đăng nhập hoặc mật khẩu!");
+            AlertHelper.showWarning("Lỗi đăng nhập", "Sai tên đăng nhập hoặc mật khẩu!");
         }
     }
 }

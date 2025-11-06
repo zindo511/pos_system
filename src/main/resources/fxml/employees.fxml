@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="620"
+            prefWidth="1110" styleClass="border-pane" stylesheets="@../styles/employees-style.css"
+            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.pos.controller.EmployeeController">
+
+
+    <top>
+        <VBox alignment="TOP_CENTER" prefHeight="300" prefWidth="1110" style="-fx-spacing: 5; -fx-padding: 10;"
+              styleClass="main-container" BorderPane.alignment="CENTER">
+            <children>
+                <!-- Search Section -->
+                <HBox alignment="CENTER_LEFT" prefHeight="50" prefWidth="1100" style="-fx-spacing: 10;"
+                      styleClass="search-section">
+                    <children>
+                        <TextField fx:id="searchField" prefHeight="40" prefWidth="900"
+                                   promptText="Nhập từ khóa tìm kiếm..." styleClass="search-field"/>
+                        <Button fx:id="searchButton" mnemonicParsing="false" onAction="#handleSearch" prefHeight="40"
+                                prefWidth="80" styleClass="search-button" text="Tìm kiếm"/>
+                        <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#handleRefresh" prefHeight="40"
+                                prefWidth="80" styleClass="refresh-button" text="Làm mới"/>
+                    </children>
+                </HBox>
+
+
+                <!-- Form Section -->
+                <VBox style="-fx-spacing: 5;" styleClass="form-section">
+                    <children>
+                        <!-- Employee Name -->
+                        <HBox alignment="CENTER_LEFT" prefHeight="50" prefWidth="1100" style="-fx-spacing: 10;">
+                            <children>
+                                <Label contentDisplay="CENTER" prefHeight="40" prefWidth="150"
+                                       style="-fx-font-size: 14;" styleClass="form-label" text="Tên nhân viên"/>
+                                <TextField fx:id="fullNameField" prefHeight="40" prefWidth="900"
+                                           promptText="Nhập tên nhân viên..." styleClass="text-field"/>
+                            </children>
+                        </HBox>
+
+
+                        <!-- Username -->
+                        <HBox alignment="CENTER_LEFT" prefHeight="50" prefWidth="1100" style="-fx-spacing: 10;">
+                            <children>
+                                <Label contentDisplay="CENTER" prefHeight="40" prefWidth="150"
+                                       style="-fx-font-size: 14;" styleClass="form-label" text="Tên đăng nhập"/>
+                                <TextField fx:id="usernameField" prefHeight="40" prefWidth="900"
+                                           promptText="Nhập tên đăng nhập..." styleClass="text-field"/>
+                            </children>
+                        </HBox>
+
+
+                        <!-- Password -->
+                        <HBox alignment="CENTER_LEFT" prefHeight="50" prefWidth="1100" style="-fx-spacing: 10;">
+                            <children>
+                                <Label contentDisplay="CENTER" prefHeight="40" prefWidth="150"
+                                       style="-fx-font-size: 14;" styleClass="form-label" text="Mật khẩu"/>
+                                <PasswordField fx:id="passwordField" prefHeight="40" prefWidth="900"
+                                               promptText="Nhập mật khẩu..." styleClass="text-field"/>
+                            </children>
+                        </HBox>
+
+
+                        <!-- Phone Number -->
+                        <HBox alignment="CENTER_LEFT" prefHeight="50" prefWidth="1100" style="-fx-spacing: 10;">
+                            <children>
+                                <Label contentDisplay="CENTER" prefHeight="40" prefWidth="150"
+                                       style="-fx-font-size: 14;" styleClass="form-label" text="Số điện thoại"/>
+                                <TextField fx:id="phoneField" prefHeight="40" prefWidth="900"
+                                           promptText="Nhập số điện thoại..." styleClass="text-field"/>
+                            </children>
+                        </HBox>
+
+
+                        <!-- Role -->
+                        <HBox alignment="CENTER_LEFT" prefHeight="50" prefWidth="1100" style="-fx-spacing: 10;">
+                            <children>
+                                <Label contentDisplay="CENTER" prefHeight="40" prefWidth="150"
+                                       style="-fx-font-size: 14;" styleClass="form-label" text="Vai trò"/>
+                                <ComboBox fx:id="roleCombo" prefHeight="8.0" prefWidth="200.0"
+                                          promptText="Chọn vai trò..." styleClass="combo-box"/>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+
+                <!-- Button Section -->
+                <HBox alignment="CENTER" prefHeight="30.0" prefWidth="1100" style="-fx-spacing: 10;"
+                      styleClass="button-container">
+                    <children>
+                        <Button fx:id="addButton" mnemonicParsing="false" onAction="#handleAdd" styleClass="add-button"
+                                text="Thêm"/>
+                        <Button fx:id="updateButton" mnemonicParsing="false" onAction="#handleUpdate"
+                                styleClass="update-button" text="Cập nhật"/>
+                        <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#handleDelete"
+                                styleClass="delete-button" text="Xoá"/>
+                        <Button fx:id="clearButton" mnemonicParsing="false" onAction="#handleClear"
+                                styleClass="clear-button" text="Xoá form"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </top>
+    <center>
+        <TableView fx:id="employeeTable" editable="true" prefHeight="330" prefWidth="1100" styleClass="table-view"
+                   BorderPane.alignment="TOP_CENTER">
+            <columns>
+                <TableColumn fx:id="colId" prefWidth="77.0" styleClass="table-column" text="ID"/>
+                <TableColumn fx:id="colFullName" prefWidth="277.0" styleClass="table-column" text="Tên nhân viên"/>
+                <TableColumn fx:id="colUsername" prefWidth="267.0" styleClass="table-column" text="Username"/>
+                <TableColumn fx:id="colRole" prefWidth="202.0" styleClass="table-column" text="Vai trò"/>
+                <TableColumn fx:id="colPhone" prefWidth="202.0" styleClass="table-column" text="Số điện thoại"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>
+

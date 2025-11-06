@@ -6,12 +6,17 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-// CRUD: create(add) - read(get) - update - delete
 public class CategoryDAO {
 
+    /**
+     * Lấy danh sách tất cả các danh mục (Category) từ cơ sở dữ liệu.
+     * Mỗi danh mục được nhóm theo tên (name) và chỉ lấy bản ghi có id nhỏ nhất.
+     *
+     * @return Danh sách các đối tượng Category.
+     */
     public List<Category> getAllCategories() {
         List<Category> categories = new ArrayList<>();
-        String query = "SELECT * FROM categories ORDER BY name";
+        String query = "SELECT MIN(id) AS id, name, MIN(description) AS description FROM categories GROUP BY name ORDER BY name";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query);
@@ -30,7 +35,12 @@ public class CategoryDAO {
         return categories;
     }
 
-    // return true (add successful)
+    /**
+     * Thêm một danh mục (Category) mới vào cơ sở dữ liệu.
+     *
+     * @param category Đối tượng Category chứa thông tin tên và mô tả danh mục cần thêm.
+     * @return true nếu thêm thành công, false nếu có lỗi xảy ra.
+     */
     public boolean addCategory(Category category) {
         String query = "INSERT INTO categories(name, description) VALUES(?, ?)";
 
@@ -42,12 +52,12 @@ public class CategoryDAO {
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
+            // In lỗi chi tiết ra console nếu xảy ra lỗi SQL
             e.printStackTrace();
             return false;
         }
     }
 
-    // return true (update successful)
     public boolean updateCategory(Category category) {
         String query = "UPDATE categories SET name=?, description=? WHERE id=?";
 
@@ -65,14 +75,19 @@ public class CategoryDAO {
         }
     }
 
-    // return true (delete successful)
-    public boolean deleteCategory(Category category) {
-        String query = "DELETE FROM categories WHERE id?";
+    /**
+     * Xóa một danh mục (Category) khỏi cơ sở dữ liệu dựa theo id.
+     *
+     * @param id Mã định danh (id) của danh mục cần xóa.
+     * @return true nếu xóa thành công (có ít nhất một dòng bị ảnh hưởng), false nếu có lỗi xảy ra hoặc không tìm thấy id.
+     */
+    public boolean deleteCategory(int id) {
+        String query = "DELETE FROM categories WHERE id=?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setInt(1, category.getId());
+            pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

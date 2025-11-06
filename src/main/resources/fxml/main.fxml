@@ -1,84 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+
 <?import javafx.geometry.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.text.*?>
-<?import java.lang.*?>
-<?import java.net.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="659.0" prefWidth="1235.0" styleClass="border-pane" stylesheets="@../styles/main-style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
 
-    <left>
-        <VBox alignment="TOP_CENTER" prefHeight="590.0" prefWidth="230.0" styleClass="sidebar-vbox" BorderPane.alignment="CENTER">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0"
+            prefWidth="1250.0" styleClass="border-pane" stylesheets="@../styles/main-style.css"
+            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.pos.controller.MainController">
+
+
+    <!-- TOP HEADER -->
+    <top>
+        <HBox prefHeight="70.0" prefWidth="1250.0" styleClass="header-hbox" BorderPane.alignment="CENTER">
             <children>
-                <Button mnemonicParsing="false" prefHeight="59.0" prefWidth="189.0" styleClass="sidebar-button" text="Bán hàng">
+                <Label prefHeight="30.0" prefWidth="800.0" styleClass="header-label"
+                       text="KEEP CALM - Phần mềm quản lý cửa hàng"/>
+                <Region styleClass="spacer-region" HBox.hgrow="ALWAYS"/>
+                <Label fx:id="userLabel" prefHeight="39.0" prefWidth="283.0" style="-fx-font-size: 14;"
+                       styleClass="header-label" text="User Info"/>
+            </children>
+            <padding>
+                <Insets left="20.0" right="20.0"/>
+            </padding>
+        </HBox>
+    </top>
+
+
+    <!-- LEFT SIDEBAR -->
+    <left>
+        <VBox alignment="TOP_CENTER" prefHeight="630.0" prefWidth="150" spacing="15" styleClass="sidebar-vbox"
+              BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+            </padding>
+            <children>
+                <Button fx:id="btnSales" mnemonicParsing="false" prefHeight="40" prefWidth="120"
+                        styleClass="sidebar-button" text="Bán hàng">
                     <font>
-                        <Font size="22.0" />
+                        <Font size="13.0"/>
                     </font>
                 </Button>
-                <Button mnemonicParsing="false" prefHeight="61.0" prefWidth="181.0" styleClass="sidebar-button" text="Quản lý sản phẩm" />
-                <Button mnemonicParsing="false" prefHeight="60.0" prefWidth="187.0" styleClass="sidebar-button" text="Báo cáo">
+
+
+                <Button fx:id="btnProducts" mnemonicParsing="false" prefHeight="40" prefWidth="120"
+                        styleClass="sidebar-button" text="Sản phẩm">
                     <font>
-                        <Font size="40.0" />
+                        <Font size="13.0"/>
                     </font>
                 </Button>
-                <Region prefHeight="0.0" prefWidth="18.0" styleClass="spacer-region" VBox.vgrow="ALWAYS" />
-                <VBox alignment="CENTER" prefHeight="50.0" prefWidth="170.0">
+
+
+                <Button fx:id="btnOrders" mnemonicParsing="false" prefHeight="40" prefWidth="120"
+                        styleClass="sidebar-button" text="Đơn hàng">
+                    <font>
+                        <Font size="13.0"/>
+                    </font>
+                </Button>
+
+
+                <Button fx:id="btnEmployees" mnemonicParsing="false" prefHeight="40.0" prefWidth="120"
+                        styleClass="sidebar-button" text="Nhân viên">
+                    <font>
+                        <Font size="13.0"/>
+                    </font>
+                </Button>
+
+
+                <Button fx:id="btnReports" mnemonicParsing="false" prefHeight="40.0" prefWidth="120"
+                        styleClass="sidebar-button" text="Báo cáo">
+                    <font>
+                        <Font size="13.0"/>
+                    </font>
+                </Button>
+
+
+                <Region prefHeight="200.0" prefWidth="150" styleClass="spacer-region" VBox.vgrow="ALWAYS"/>
+
+
+                <VBox alignment="CENTER" prefHeight="180.0" prefWidth="150">
                     <children>
-                        <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="151.0" styleClass="logout-button" text="Đăng xuất" />
+                        <Button mnemonicParsing="false" onAction="#handleLogout" prefHeight="48.0" prefWidth="171.0"
+                                style="-fx-font-size: 16;" styleClass="logout-button" text="Đăng xuất">
+                            <font>
+                                <Font size="16.0"/>
+                            </font>
+                        </Button>
                     </children>
                 </VBox>
             </children>
         </VBox>
     </left>
-
-    <top>
-        <HBox prefHeight="63.0" prefWidth="1235.0" styleClass="header-hbox" BorderPane.alignment="CENTER">
-            <children>
-                <Label prefHeight="40.0" prefWidth="712.0" styleClass="header-label" text="KEEP CALM - phần mềm quản lý cửa hàng" />
-                <Region styleClass="spacer-region" HBox.hgrow="ALWAYS" />
-            </children>
-        </HBox>
-    </top>
-
     <center>
-        <GridPane alignment="CENTER" prefHeight="582.0" prefWidth="982.0" styleClass="content-grid" BorderPane.alignment="CENTER">
-            <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="797.0" minWidth="10.0" prefWidth="429.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="747.0" minWidth="10.0" prefWidth="466.0" />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            </rowConstraints>
-            <BorderPane.margin>
-                <Insets bottom="20.0" left="30.0" right="20.0" top="20.0" />
-            </BorderPane.margin>
-            <children>
-                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="feature-box">
-                    <children>
-                        <Label alignment="CENTER" prefHeight="80.0" prefWidth="457.0" styleClass="feature-label" text="Tiết kiệm thời gian" />
-                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="518.0" styleClass="extra-feature-label" text=" Tự động hóa mọi thao tác" />
-                    </children>
-                </VBox>
-                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="feature-box" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                    <children>
-                        <Label alignment="CENTER" prefHeight="93.0" prefWidth="456.0" styleClass="feature-label" text="Giảm sai sót" />
-                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="526.0" styleClass="extra-feature-label" text="Tính toán chính xác" />
-                    </children>
-                </VBox>
-                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="feature-box" GridPane.rowIndex="2">
-                    <children>
-                        <Label alignment="CENTER" prefHeight="70.0" prefWidth="457.0" styleClass="feature-label" text="Quản lý dễ dàng" />
-                        <Label alignment="CENTER" prefHeight="58.0" prefWidth="558.0" styleClass="extra-feature-label" text="Mọi thông tin trong tầm tay" />
-                    </children>
-                </VBox>
-            </children>
-        </GridPane>
+        <StackPane fx:id="contentArea" alignment="TOP_LEFT" prefHeight="600" prefWidth="1110.0" style="-fx-padding: 0;"
+                   BorderPane.alignment="CENTER"/>
     </center>
 </BorderPane>
+

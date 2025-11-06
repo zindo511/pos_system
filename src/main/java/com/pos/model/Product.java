@@ -6,30 +6,32 @@ public class Product {
     private final IntegerProperty id;
     private final StringProperty name;
     private final IntegerProperty categoryId;
+    private final StringProperty categoryName;
     private final DoubleProperty price;
     private final IntegerProperty stock;
     private final StringProperty imagePath;
-
-    // Constructor no-argument
 
     public Product() {
         this.id = new SimpleIntegerProperty();
         this.name = new SimpleStringProperty();
         this.categoryId = new SimpleIntegerProperty();
+        this.categoryName = new SimpleStringProperty();
         this.price = new SimpleDoubleProperty();
         this.stock = new SimpleIntegerProperty();
         this.imagePath = new SimpleStringProperty();
     }
 
-    public Product(int id, String name, int categoryId, double price, int stock, String imagePath) {
+    public Product(int id, String name, int categoryId, String categoryName, double price, int stock, String imagePath) {
         this();
         setId(id);
         setName(name);
         setCategoryId(categoryId);
+        setCategoryName(categoryName);
         setPrice(price);
         setStock(stock);
         setImagePath(imagePath);
     }
+
 
     // ID
     public int getId() {
@@ -44,7 +46,7 @@ public class Product {
         return id;
     }
 
-    //Name
+    // Name
     public String getName() {
         return name.get();
     }
@@ -57,7 +59,7 @@ public class Product {
         return name;
     }
 
-    //CategoryID
+    // CategoryID
     public int getCategoryId() {
         return categoryId.get();
     }
@@ -70,7 +72,20 @@ public class Product {
         return categoryId;
     }
 
-    //Price
+    // CategoryName
+    public String getCategoryName() {
+        return categoryName.get();
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName.set(categoryName);
+    }
+
+    public StringProperty categoryNameProperty() {
+        return categoryName;
+    }
+
+    // Price
     public double getPrice() {
         return price.get();
     }
@@ -83,7 +98,7 @@ public class Product {
         return price;
     }
 
-    //Stock
+    // Stock
     public int getStock() {
         return stock.get();
     }
@@ -96,7 +111,7 @@ public class Product {
         return stock;
     }
 
-    //ImagePath
+    // ImagePath
     public String getImagePath() {
         return imagePath.get();
     }

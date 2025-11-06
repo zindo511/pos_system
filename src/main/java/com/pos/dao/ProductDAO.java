@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-// CRUD: Create(add) - Read(get) - Update - Delete
 public class ProductDAO {
 
     public List<Product> getAllProducts() {
@@ -27,6 +26,7 @@ public class ProductDAO {
                 product.setId(rs.getInt("id"));
                 product.setName(rs.getString("name"));
                 product.setCategoryId(rs.getInt("category_id"));
+                product.setCategoryName(rs.getString("category_name"));
                 product.setPrice(rs.getDouble("price"));
                 product.setStock(rs.getInt("stock"));
                 product.setImagePath(rs.getString("image_path"));
@@ -38,7 +38,6 @@ public class ProductDAO {
         return products;
     }
 
-    // return true (add successful)
     public boolean addProduct(Product product) {
         String query = "INSERT INTO products(name, category_id, price, stock, image_path) VALUES(?, ?, ?, ?, ?)";
 
@@ -58,7 +57,6 @@ public class ProductDAO {
         }
     }
 
-    // return true (update successful)
     public boolean updateProduct(Product product) {
         String query = "UPDATE products SET name=?, category_id=?, price=?, stock=?, image_path=? WHERE id=?";
 
@@ -79,7 +77,6 @@ public class ProductDAO {
         }
     }
 
-    // return true (delete successful)
     public boolean deleteProduct(int id) {
         String query = "DELETE FROM products WHERE id=?";
 
@@ -94,7 +91,6 @@ public class ProductDAO {
         }
     }
 
-    // return true (update successful)
     public boolean updateStock(int productId, int quantity) {
         String query = "UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?";
 
@@ -112,23 +108,24 @@ public class ProductDAO {
         }
     }
 
-    // search name product like %keyword%
     public List<Product> searchProducts(String keyword) {
         List<Product> products = new ArrayList<>();
         String query = "SELECT p.*, c.name as category_name FROM products as p " +
-                "LEFT JOIN categories as c ON p.category_id = c.id "
-                + "WHERE p.name LIKE ? ORDER BY p.name";
+                "LEFT JOIN categories as c ON p.category_id = c.id " +
+                "WHERE p.name LIKE ? ORDER BY p.name";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setString(1, "%" + keyword + "%");
             ResultSet rs = pstmt.executeQuery();
+
             while (rs.next()) {
                 Product product = new Product();
                 product.setId(rs.getInt("id"));
                 product.setName(rs.getString("name"));
                 product.setCategoryId(rs.getInt("category_id"));
+                product.setCategoryName(rs.getString("category_name"));
                 product.setPrice(rs.getDouble("price"));
                 product.setStock(rs.getInt("stock"));
                 product.setImagePath(rs.getString("image_path"));
@@ -138,5 +135,33 @@ public class ProductDAO {
             e.printStackTrace();
         }
         return products;
+    }
+
+    public Product getProductById(int productId) {
+        String query = "SELECT p.*, c.name as category_name FROM products p " +
+                "LEFT JOIN categories c ON p.category_id = c.id " +
+                "WHERE p.id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setInt(1, productId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                Product product = new Product();
+                product.setId(rs.getInt("id"));
+                product.setName(rs.getString("name"));
+                product.setCategoryId(rs.getInt("category_id"));
+                product.setCategoryName(rs.getString("category_name"));
+                product.setPrice(rs.getDouble("price"));
+                product.setStock(rs.getInt("stock"));
+                product.setImagePath(rs.getString("image_path"));
+                return product;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

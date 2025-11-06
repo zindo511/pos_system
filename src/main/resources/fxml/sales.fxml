@@ -1,77 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 
-<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.pos.controller.SalesController">
+<BorderPane styleClass="sales-root" stylesheets="@../styles/sale-style.css" xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.pos.controller.SalesController">
+
+
     <padding>
-        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+        <Insets bottom="10" left="10" right="10" top="10"/>
     </padding>
 
 
+    <!-- ========== PHẦN TRÊN ========== -->
     <top>
-        <VBox spacing="10">
-            <Label text="BÁN HÀNG" style="-fx-font-weight: bold; -fx-font-size: 18;"/>
-            <HBox spacing="10" alignment="CENTER_LEFT">
+        <VBox spacing="15" styleClass="header-section">
+            <HBox alignment="CENTER_LEFT" spacing="20" styleClass="title-bar">
+                <Label styleClass="page-title" text="BÁN HÀNG"/>
+
+
+                <HBox alignment="CENTER_LEFT" spacing="15" styleClass="employee-info">
+                    <VBox spacing="2">
+                        <Label styleClass="info-label" text="Nhân viên:"/>
+                        <Label fx:id="employeeNameLabel" styleClass="info-value" text="..."/>
+                    </VBox>
+                    <Separator orientation="VERTICAL" prefHeight="30"/>
+                    <VBox spacing="2">
+                        <Label styleClass="info-label" text="Ngày:"/>
+                        <Label fx:id="dateLabel" styleClass="info-value" text="--/--/----"/>
+                    </VBox>
+                    <Separator orientation="VERTICAL" prefHeight="30"/>
+                    <VBox spacing="2">
+                        <Label styleClass="info-label" text="Giờ:"/>
+                        <Label fx:id="timeLabel" styleClass="info-value" text="--:--:--"/>
+                    </VBox>
+                </HBox>
+            </HBox>
+
+
+            <!-- Tìm kiếm -->
+            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="search-bar">
                 <Label text="Tìm kiếm sản phẩm:"/>
-                <TextField fx:id="searchField" promptText="Nhập tên sản phẩm..." prefWidth="300"/>
-                <Button text="Tìm kiếm" onAction="#handleSearch"
-                        style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>
+                <TextField fx:id="searchField" prefWidth="300" promptText="Nhập tên sản phẩm..."
+                           styleClass="search-field"/>
+                <Button onAction="#handleSearch" styleClass="btn-primary" text="Tìm kiếm"/>
             </HBox>
         </VBox>
     </top>
 
 
+    <!-- ========== PHẦN TRUNG TÂM ========== -->
     <center>
-        <HBox spacing="20">
-            <!-- Cột sản phẩm -->
-            <VBox spacing="10" prefWidth="400">
-                <Label text="DANH SÁCH SẢN PHẨM" style="-fx-font-weight: bold;"/>
-                <TableView fx:id="productTable" prefHeight="400">
+        <HBox spacing="20" styleClass="content-section">
+
+
+            <!-- DANH SÁCH SẢN PHẨM -->
+            <VBox prefWidth="400" spacing="10" styleClass="product-list">
+                <Label alignment="CENTER" prefHeight="33.0" prefWidth="400.0" styleClass="section-title"
+                       text="DANH SÁCH SẢN PHẨM"/>
+                <TableView fx:id="productTable" prefHeight="367.0" prefWidth="420.0" styleClass="custom-table">
                     <columns>
-                        <TableColumn fx:id="colProductId" text="Mã SP" prefWidth="60"/>
-                        <TableColumn fx:id="colProductName" text="Tên sản phẩm" prefWidth="180"/>
-                        <TableColumn fx:id="colPrice" text="Giá bán" prefWidth="100"/>
-                        <TableColumn fx:id="colStock" text="Tồn kho" prefWidth="60"/>
+                        <TableColumn fx:id="colProductId" prefWidth="60" text="Mã SP"/>
+                        <TableColumn fx:id="colProductName" prefWidth="180" text="Tên sản phẩm"/>
+                        <TableColumn fx:id="colPrice" prefWidth="89.99998474121094" text="Giá bán"/>
+                        <TableColumn fx:id="colStock" prefWidth="70.0" text="Tồn kho"/>
                     </columns>
                 </TableView>
-                <Button text="Thêm vào giỏ hàng" onAction="#handleAddToCart"
-                        style="-fx-background-color: #4CAF50; -fx-text-fill: white;"/>
+                <Button onAction="#handleAddToCart" styleClass="btn-success" text="Thêm vào giỏ hàng"/>
             </VBox>
 
 
-            <!-- Cột giỏ hàng và thanh toán -->
-            <VBox spacing="10" prefWidth="500">
-                <Label text="GIỎ HÀNG" style="-fx-font-weight: bold;"/>
-                <TableView fx:id="cartTable" prefHeight="250">
+            <!-- GIỎ HÀNG & THANH TOÁN -->
+            <VBox prefWidth="500" spacing="10" styleClass="cart-section">
+                <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="33.0" prefWidth="500.0"
+                       styleClass="section-title" text="GIỎ HÀNG"/>
+                <TableView fx:id="cartTable" prefHeight="245.0" prefWidth="458.0" styleClass="custom-table">
                     <columns>
-                        <TableColumn fx:id="colCartProduct" text="Sản phẩm" prefWidth="150"/>
-                        <TableColumn fx:id="colCartQuantity" text="SL" prefWidth="50"/>
-                        <TableColumn fx:id="colCartPrice" text="Đơn giá" prefWidth="100"/>
-                        <TableColumn fx:id="colCartSubtotal" text="Thành tiền" prefWidth="120"/>
+                        <TableColumn fx:id="colCartProduct" prefWidth="150" text="Sản phẩm"/>
+                        <TableColumn fx:id="colCartQuantity" prefWidth="50" text="SL"/>
+                        <TableColumn fx:id="colCartPrice" prefWidth="100" text="Đơn giá"/>
+                        <TableColumn fx:id="colCartSubtotal" prefWidth="120" text="Thành tiền"/>
                     </columns>
                 </TableView>
 
 
-                <HBox spacing="10">
-                    <Button text="Xóa sản phẩm" onAction="#handleRemoveFromCart"
-                            style="-fx-background-color: #ff9800; -fx-text-fill: white;"/>
-                    <Button text="Xóa tất cả" onAction="#handleClearCart"
-                            style="-fx-background-color: #f44336; -fx-text-fill: white;"/>
+                <HBox spacing="10" styleClass="cart-buttons">
+                    <Button onAction="#handleRemoveFromCart" styleClass="btn-warning" text="Xóa sản phẩm"/>
+                    <Button onAction="#handleClearCart" styleClass="btn-danger" text="Xóa tất cả"/>
                 </HBox>
 
 
-                <!-- Panel thanh toán -->
-                <VBox spacing="15"
-                      style="-fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 5; -fx-padding: 15; -fx-background-color: #f9f9f9;">
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Tổng tiền:" style="-fx-font-weight: bold; -fx-font-size: 14;"/>
-                        <Label fx:id="totalLabel" text="0 đ"
-                               style="-fx-font-weight: bold; -fx-text-fill: #e91e63; -fx-font-size: 16;"/>
+                <!-- PANEL THANH TOÁN -->
+                <VBox spacing="15" styleClass="payment-panel">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Tổng tiền:"/>
+                        <Label fx:id="totalLabel" styleClass="total-label" text="0 đ"/>
                     </HBox>
 
 
@@ -82,34 +108,34 @@
                         </columnConstraints>
 
 
+                        <Label text="Phương thức TT:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <ComboBox fx:id="paymentMethodCombo" prefWidth="150" GridPane.columnIndex="1"
+                                  GridPane.rowIndex="0"/>
+
+
+                        <Label text="Tiền khách đưa:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="customerPaidField" promptText="Nhập số tiền..." GridPane.columnIndex="1"
+                                   GridPane.rowIndex="1"/>
+
+
+                        <Label text="Tiền thừa trả khách:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <Label fx:id="changeLabel" styleClass="change-label" text="0 đ" GridPane.columnIndex="1"
+                               GridPane.rowIndex="2"/>
                         <rowConstraints>
-                            <RowConstraints prefHeight="30"/>
-                            <RowConstraints prefHeight="30"/>
-                            <RowConstraints prefHeight="30"/>
+                            <RowConstraints/>
+                            <RowConstraints/>
+                            <RowConstraints/>
                         </rowConstraints>
-
-
-                        <Label text="Phương thức TT:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                        <ComboBox fx:id="paymentMethodCombo" prefWidth="150" GridPane.rowIndex="0"
-                                  GridPane.columnIndex="1"/>
-
-
-                        <Label text="Tiền khách đưa:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                        <TextField fx:id="customerPaidField" promptText="Nhập số tiền..." GridPane.rowIndex="1"
-                                   GridPane.columnIndex="1"/>
-
-
-                        <Label text="Tiền thừa trả khách:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                        <Label fx:id="changeLabel" text="0 đ" style="-fx-font-weight: bold; -fx-text-fill: #2196F3;"
-                               GridPane.rowIndex="2" GridPane.columnIndex="1"/>
                     </GridPane>
 
 
-                    <Button text="THANH TOÁN" onAction="#handleCheckout"
-                            style="-fx-background-color: #9C27B0; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-padding: 10;"
-                            maxWidth="Infinity"/>
+                    <ProgressBar fx:id="loadingProgressBar" progress="0" styleClass="loading-bar" visible="false"/>
+
+
+                    <Button fx:id="checkoutButton" onAction="#handleCheckout" styleClass="btn-pay" text="THANH TOÁN"/>
                 </VBox>
             </VBox>
         </HBox>
     </center>
 </BorderPane>
+

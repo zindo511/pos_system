@@ -1,87 +1,215 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.text.*?>
+
 <?import javafx.scene.chart.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="678.0"
-            prefWidth="1320.0" styleClass="border-pane" stylesheets="@../styles/tmp-style.css"
-            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
 
+<BorderPane prefHeight="569.0" prefWidth="1021.0" styleClass="border-pane" stylesheets="@../styles/report-style.css"
+            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.pos.controller.ReportController">
+
+
+    <!-- ======== HEADER ======== -->
     <top>
-        <HBox prefHeight="52.0" prefWidth="1301.0" styleClass="header-box" BorderPane.alignment="CENTER">
+        <HBox alignment="CENTER" prefHeight="52.0" styleClass="header-box">
             <children>
-                <Label styleClass="main-title" text="BÁO CÁO DOANH THU HÀNG THÁNG"/>
+                <Label styleClass="main-title" text="BÁO CÁO DOANH THU "/>
             </children>
         </HBox>
     </top>
 
-    <left>
-        <VBox alignment="TOP_CENTER" prefHeight="573.0" prefWidth="196.0" styleClass="sidebar-vbox"
-              BorderPane.alignment="CENTER">
-            <children>
-                <Button alignment="CENTER" mnemonicParsing="false" prefHeight="39.0" prefWidth="132.0"
-                        styleClass="sidebar-button" text="Bán hàng"/>
-                <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="130.0" styleClass="sidebar-button"
-                        text="Quản lý sản phẩm"/>
-                <Button mnemonicParsing="false" prefHeight="39.0" prefWidth="142.0" styleClass="sidebar-button"
-                        text="Báo cáo"/>
-                <Region styleClass="spacer-region" VBox.vgrow="ALWAYS"/>
-                <Button mnemonicParsing="false" prefHeight="37.0" prefWidth="128.0" styleClass="logout-button"
-                        text="Đăng xuất"/>
-            </children>
-        </VBox>
-    </left>
 
+    <!-- ======== MAIN CONTENT ======== -->
     <center>
-        <BorderPane prefHeight="498.0" prefWidth="1105.0" styleClass="content-border-pane"
-                    BorderPane.alignment="CENTER">
+        <BorderPane prefHeight="498.0" styleClass="content-border-pane">
 
+
+            <!-- ======== FILTER TOOLBAR ======== -->
             <top>
-                <HBox alignment="CENTER_RIGHT" prefHeight="68.0" prefWidth="1105.0" styleClass="toolbar-box"
-                      BorderPane.alignment="CENTER">
+                <VBox prefHeight="120.0" spacing="15" styleClass="toolbar-box">
                     <children>
-                        <Button mnemonicParsing="false" styleClass="export-button" text="Xuất báo cáo"/>
-                    </children>
-                </HBox>
-            </top>
 
-            <center>
-                <HBox prefHeight="101.0" prefWidth="1105.0" styleClass="profit-stats-box" BorderPane.alignment="CENTER">
-                    <children>
-                        <VBox alignment="TOP_CENTER" prefHeight="67.0" prefWidth="344.0" styleClass="profit-card">
-                            <children>
-                                <Label styleClass="profit-label" text="Lợi nhuận tháng trước"/>
-                                <TextField alignment="CENTER" disable="true" editable="false"
-                                           styleClass="profit-field last-month" text="₫15,230,000"/>
-                            </children>
-                        </VBox>
-                        <VBox alignment="TOP_CENTER" prefHeight="67.0" prefWidth="379.0" styleClass="profit-card">
-                            <children>
-                                <Label styleClass="profit-label" text="Lợi nhuận tháng này"/>
-                                <TextField alignment="CENTER" disable="true" editable="false"
-                                           styleClass="profit-field current-month" text="₫18,450,000"/>
-                            </children>
-                        </VBox>
-                    </children>
-                </HBox>
-            </center>
 
-            <bottom>
-                <VBox prefHeight="438.0" prefWidth="1105.0" styleClass="chart-container" BorderPane.alignment="CENTER">
-                    <children>
-                        <HBox prefHeight="120.0" prefWidth="1105.0" styleClass="chart-header">
+                        <!-- Dòng 1: Bộ lọc thời gian + loại báo cáo -->
+                        <HBox alignment="CENTER_LEFT" spacing="15">
                             <children>
-                                <Label styleClass="chart-title" text="Biểu đồ thu - chi - lợi nhuận hàng tháng"/>
+                                <Label styleClass="filter-label" text="Từ ngày:"/>
+                                <DatePicker fx:id="startDatePicker" prefWidth="130" styleClass="date-picker"/>
+
+
+                                <Label styleClass="filter-label" text="Đến ngày:"/>
+                                <DatePicker fx:id="endDatePicker" prefWidth="130" styleClass="date-picker"/>
+
+
+                                <Label styleClass="filter-label" text="Loại báo cáo:"/>
+                                <ComboBox fx:id="reportTypeComboBox" prefHeight="44.0" prefWidth="193.0"
+                                          styleClass="combo-box"/>
+
+
+                                <Button fx:id="generateReportButton" prefHeight="44.0" prefWidth="147.0"
+                                        styleClass="generate-button" text="Tạo báo cáo"/>
                             </children>
                         </HBox>
+
+
+                        <!-- Dòng 2: Loại biểu đồ + xuất báo cáo -->
+                        <HBox alignment="CENTER_RIGHT" spacing="15">
+                            <children>
+                                <Label styleClass="filter-label" text="Loại biểu đồ:"/>
+                                <ComboBox fx:id="chartTypeComboBox" prefHeight="44.0" prefWidth="147.0"
+                                          styleClass="combo-box"/>
+                                <Button fx:id="exportButton" prefHeight="47.0" prefWidth="150.0"
+                                        styleClass="export-button" text="Xuất báo cáo"/>
+                            </children>
+                        </HBox>
+
+
                     </children>
                 </VBox>
-            </bottom>
+            </top>
+
+
+            <!-- ======== TABPANE CHÍNH ======== -->
+            <center>
+                <TabPane fx:id="reportTabPane" prefHeight="400.0" styleClass="report-tab-pane"
+                         tabClosingPolicy="UNAVAILABLE">
+
+
+                    <!-- TAB 1: Báo cáo bán hàng -->
+                    <Tab fx:id="salesTab" styleClass="report-tab" text="Báo cáo bán hàng">
+                        <content>
+                            <VBox prefHeight="400" prefWidth="1050" spacing="15">
+                                <!-- Thống kê tổng quan -->
+                                <HBox alignment="CENTER_LEFT" spacing="30" styleClass="stats-container">
+                                    <children>
+                                        <VBox spacing="5" styleClass="stat-item">
+                                            <children>
+                                                <Label styleClass="stat-label" text="Tổng doanh thu:"/>
+                                                <Label fx:id="totalSalesLabel" styleClass="stat-value revenue-value"
+                                                       text="₫0"/>
+                                            </children>
+                                        </VBox>
+
+
+                                        <VBox spacing="5" styleClass="stat-item">
+                                            <children>
+                                                <Label styleClass="stat-label" text="Tổng đơn hàng:"/>
+                                                <Label fx:id="totalOrdersLabel" styleClass="stat-value order-value"
+                                                       text="0"/>
+                                            </children>
+                                        </VBox>
+
+
+                                        <VBox spacing="5" styleClass="stat-item">
+                                            <children>
+                                                <Label styleClass="stat-label" text="Trung bình/đơn:"/>
+                                                <Label fx:id="averageOrderLabel" styleClass="stat-value average-value"
+                                                       text="₫0"/>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+
+                                <!-- Bảng đơn hàng -->
+                                <TableView fx:id="salesTableView" prefHeight="300.0" prefWidth="1001.0"
+                                           styleClass="report-table">
+                                    <columns>
+                                        <TableColumn fx:id="orderIdColumn" prefWidth="80" text="Mã đơn"/>
+                                        <TableColumn fx:id="orderDateColumn" prefWidth="150" text="Ngày đặt"/>
+                                        <TableColumn fx:id="employeeColumn" prefWidth="100" text="Nhân viên"/>
+                                        <TableColumn fx:id="totalColumn" prefWidth="120" text="Tổng tiền"/>
+                                    </columns>
+                                </TableView>
+                            </VBox>
+                        </content>
+                    </Tab>
+
+
+                    <!-- TAB 2: Báo cáo sản phẩm -->
+                    <Tab fx:id="productTab" styleClass="report-tab" text="Báo cáo sản phẩm">
+                        <content>
+                            <VBox prefHeight="400" prefWidth="1050" spacing="15">
+                                <!-- Thống kê sản phẩm -->
+                                <HBox alignment="CENTER_LEFT" spacing="30" styleClass="stats-container">
+                                    <children>
+                                        <VBox spacing="5" styleClass="stat-item">
+                                            <children>
+                                                <Label styleClass="stat-label" text="Sản phẩm bán chạy:"/>
+                                                <Label fx:id="topProductLabel" styleClass="stat-value product-value"
+                                                       text="N/A"/>
+                                            </children>
+                                        </VBox>
+
+
+                                        <VBox spacing="5" styleClass="stat-item">
+                                            <children>
+                                                <Label styleClass="stat-label" text="Tổng sản phẩm đã bán:"/>
+                                                <Label fx:id="totalProductsSoldLabel"
+                                                       styleClass="stat-value quantity-value" text="0"/>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+
+
+                                <!-- Bảng sản phẩm -->
+                                <TableView fx:id="productTableView" prefHeight="300" styleClass="report-table">
+                                    <columns>
+                                        <TableColumn fx:id="productNameColumn" prefWidth="200" text="Tên sản phẩm"/>
+                                        <TableColumn fx:id="quantitySoldColumn" prefWidth="100" text="Số lượng bán"/>
+                                        <TableColumn fx:id="revenueColumn" prefWidth="120" text="Doanh thu"/>
+                                    </columns>
+                                </TableView>
+                            </VBox>
+                        </content>
+                    </Tab>
+
+
+                    <!-- TAB 3: Biểu đồ -->
+                    <Tab fx:id="chartTab" styleClass="report-tab" text="Biểu đồ">
+                        <content>
+                            <StackPane fx:id="chartContainer" prefHeight="400" prefWidth="1050"
+                                       styleClass="chart-container">
+
+
+                                <!--                                 Bar Chart -->
+                                <BarChart fx:id="salesBarChart" prefHeight="350" prefWidth="1050" styleClass="bar-chart"
+                                          title="Biểu đồ doanh thu theo ngày">
+                                    <xAxis>
+                                        <CategoryAxis label="Ngày" styleClass="chart-axis"/>
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis label="Doanh thu (₫)" styleClass="chart-axis"/>
+                                    </yAxis>
+                                </BarChart>
+
+
+                                <!--                                 Line Chart -->
+                                <LineChart fx:id="salesLineChart" prefHeight="350" prefWidth="1050"
+                                           styleClass="line-chart" title="Biểu đồ xu hướng doanh thu" visible="false">
+                                    <xAxis>
+                                        <CategoryAxis label="Ngày" styleClass="chart-axis"/>
+                                    </xAxis>
+                                    <yAxis>
+                                        <NumberAxis label="Doanh thu (₫)" styleClass="chart-axis"/>
+                                    </yAxis>
+                                </LineChart>
+
+
+                                <!--                                 //Pie Chart -->
+                                <PieChart fx:id="productPieChart" prefHeight="350" prefWidth="1050"
+                                          styleClass="pie-chart" title="Top sản phẩm bán chạy" visible="false"/>
+                            </StackPane>
+                        </content>
+                    </Tab>
+
+
+                </TabPane>
+            </center>
         </BorderPane>
     </center>
 </BorderPane>
+

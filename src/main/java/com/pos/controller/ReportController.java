@@ -4,66 +4,55 @@ import com.pos.dao.OrderDAO;
 import com.pos.dao.ProductDAO;
 import com.pos.model.Order;
 import com.pos.model.OrderItem;
+import com.pos.model.ProductReport;
 import com.pos.util.AlertHelper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.PieChart;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReportController {
 
+    // ========== FXML Components ==========
     @FXML
-    private DatePicker startDatePicker;
+    private DatePicker startDatePicker, endDatePicker;
     @FXML
-    private DatePicker endDatePicker;
+    private ComboBox<String> reportTypeComboBox, chartTypeComboBox;
     @FXML
-    private ComboBox<String> reportTypeComboBox;
-    @FXML
-    private Button generateReportButton;
-    @FXML
-    private Button exportButton;
-
-    // Tabs
+    private Button generateReportButton, exportButton;
     @FXML
     private TabPane reportTabPane;
     @FXML
-    private Tab salesTab;
-    @FXML
-    private Tab productTab;
-    @FXML
-    private Tab chartTab;
+    private Tab salesTab, productTab, chartTab;
 
-    // Sales Report Components
+    // Sales Report
     @FXML
     private TableView<Order> salesTableView;
     @FXML
     private TableColumn<Order, Integer> orderIdColumn;
     @FXML
-    private TableColumn<Order, String> orderDateColumn;
-    @FXML
-    private TableColumn<Order, String> employeeColumn;
+    private TableColumn<Order, String> orderDateColumn, employeeColumn;
     @FXML
     private TableColumn<Order, Double> totalColumn;
     @FXML
-    private Label totalSalesLabel;
-    @FXML
-    private Label totalOrdersLabel;
-    @FXML
-    private Label averageOrderLabel;
+    private Label totalSalesLabel, totalOrdersLabel, averageOrderLabel;
 
-    // Product Report Components
+    // Product Report
     @FXML
     private TableView<ProductReport> productTableView;
     @FXML
@@ -73,15 +62,11 @@ public class ReportController {
     @FXML
     private TableColumn<ProductReport, Double> revenueColumn;
     @FXML
-    private Label topProductLabel;
-    @FXML
-    private Label totalProductsSoldLabel;
+    private Label topProductLabel, totalProductsSoldLabel;
 
-    // Chart Components
+    // Charts
     @FXML
-    private VBox chartContainer;
-    @FXML
-    private ComboBox<String> chartTypeComboBox;
+    private StackPane chartContainer;
     @FXML
     private BarChart<String, Number> salesBarChart;
     @FXML
@@ -89,18 +74,13 @@ public class ReportController {
     @FXML
     private PieChart productPieChart;
 
-    private OrderDAO orderDAO;
-    private ProductDAO productDAO;
-    private ObservableList<Order> orderList;
-    private ObservableList<ProductReport> productReportList;
+    // ========== Data ==========
+    private final OrderDAO orderDAO = new OrderDAO();
+    private final ProductDAO productDAO = new ProductDAO();
+    private final ObservableList<Order> orderList = FXCollections.observableArrayList();
+    private final ObservableList<ProductReport> productReportList = FXCollections.observableArrayList();
 
-    public ReportController() {
-        this.orderDAO = new OrderDAO();
-        this.productDAO = new ProductDAO();
-        this.orderList = FXCollections.observableArrayList();
-        this.productReportList = FXCollections.observableArrayList();
-    }
-
+    // ========== Initialize ==========
     @FXML
     public void initialize() {
         setupDatePickers();
@@ -109,9 +89,7 @@ public class ReportController {
         setupProductTable();
         setupCharts();
         setupEventHandlers();
-
-        // Load default report (last 30 days)
-        loadDefaultReport();
+        generateReport(); // Load default (last 30 days)
     }
 
     private void setupDatePickers() {
@@ -121,48 +99,36 @@ public class ReportController {
 
     private void setupComboBoxes() {
         reportTypeComboBox.setItems(FXCollections.observableArrayList(
-                "Daily Sales", "Weekly Sales", "Monthly Sales", "Product Performance", "Custom Range"
+                "Bán hàng theo ngày", "Bán hàng theo tuần", "Bán hàng theo tháng", "Hiệu suất sản phẩm", "Tùy chỉnh"
         ));
-        reportTypeComboBox.setValue("Monthly Sales");
+        reportTypeComboBox.setValue("Bán hàng theo tháng");
 
         chartTypeComboBox.setItems(FXCollections.observableArrayList(
-                "Bar Chart", "Line Chart", "Pie Chart"
+                "Biểu đồ cột", "Biểu đồ đường", "Biểu đồ tròn"
         ));
-        chartTypeComboBox.setValue("Bar Chart");
+        chartTypeComboBox.setValue("Biểu đồ cột");
     }
 
+    // ========== Setup Tables ==========
     private void setupSalesTable() {
-        // Sử dụng id thay vì orderId
-        orderIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        orderIdColumn.setCellValueFactory(cell -> new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getId()));
 
-        // Sử dụng createdAt và format thành String
-        orderDateColumn.setCellValueFactory(cellData -> {
-            if (cellData.getValue().getCreatedAt() != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-                return new javafx.beans.property.SimpleStringProperty(
-                        cellData.getValue().getCreatedAt().format(formatter)
-                );
-            }
-            return new javafx.beans.property.SimpleStringProperty("");
+        orderDateColumn.setCellValueFactory(cell -> {
+            LocalDateTime date = cell.getValue().getCreatedAt();
+            if (date == null) return new javafx.beans.property.SimpleStringProperty("");
+            return new javafx.beans.property.SimpleStringProperty(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         });
 
-        // Sử dụng employeeId và format thành String
-        employeeColumn.setCellValueFactory(cellData ->
-                new javafx.beans.property.SimpleStringProperty("EMP-" + cellData.getValue().getEmployeeId())
+        employeeColumn.setCellValueFactory(cell ->
+                new javafx.beans.property.SimpleStringProperty("EMP-" + cell.getValue().getEmployeeId())
         );
 
-        totalColumn.setCellValueFactory(new PropertyValueFactory<>("totalAmount"));
-
-        // Format currency
+        totalColumn.setCellValueFactory(cell -> new javafx.beans.property.SimpleObjectProperty<>(cell.getValue().getTotalAmount()));
         totalColumn.setCellFactory(col -> new TableCell<Order, Double>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", item));
-                }
+                setText(empty || item == null ? null : String.format(new Locale("vi", "VN"), "%,.0f đ", item));
             }
         });
 
@@ -174,16 +140,11 @@ public class ReportController {
         quantitySoldColumn.setCellValueFactory(new PropertyValueFactory<>("quantitySold"));
         revenueColumn.setCellValueFactory(new PropertyValueFactory<>("revenue"));
 
-        // Format currency
         revenueColumn.setCellFactory(col -> new TableCell<ProductReport, Double>() {
             @Override
             protected void updateItem(Double item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", item));
-                }
+                setText(empty || item == null ? null : String.format(new Locale("vi", "VN"), "%,.0f đ", item));
             }
         });
 
@@ -191,7 +152,6 @@ public class ReportController {
     }
 
     private void setupCharts() {
-        // Initially show bar chart only
         salesBarChart.setVisible(true);
         salesLineChart.setVisible(false);
         productPieChart.setVisible(false);
@@ -200,311 +160,246 @@ public class ReportController {
     private void setupEventHandlers() {
         generateReportButton.setOnAction(e -> generateReport());
         exportButton.setOnAction(e -> exportReport());
-
         chartTypeComboBox.setOnAction(e -> updateChartDisplay());
-
         reportTypeComboBox.setOnAction(e -> {
-            String reportType = reportTypeComboBox.getValue();
-            if (reportType != null && !reportType.equals("Custom Range")) {
-                updateDateRangeByType(reportType);
-            }
+            String type = reportTypeComboBox.getValue();
+            if (type != null && !type.equals("Tùy chỉnh")) updateDateRangeByType(type);
         });
     }
 
-    private void loadDefaultReport() {
-        generateReport();
-    }
-
+    // ========== Generate Reports ==========
     @FXML
     private void generateReport() {
-        LocalDate startDate = startDatePicker.getValue();
-        LocalDate endDate = endDatePicker.getValue();
+        LocalDate start = startDatePicker.getValue();
+        LocalDate end = endDatePicker.getValue();
 
-        if (startDate == null || endDate == null) {
-            AlertHelper.showError("Validation Error", "Please select both start and end dates.");
+        if (start == null || end == null) {
+            AlertHelper.showError("Lỗi xác thực", "Vui lòng chọn cả ngày bắt đầu và ngày kết thúc.");
             return;
         }
-
-        if (startDate.isAfter(endDate)) {
-            AlertHelper.showError("Validation Error", "Start date must be before end date.");
+        if (start.isAfter(end)) {
+            AlertHelper.showError("Lỗi xác thực", "Ngày bắt đầu phải trước ngày kết thúc.");
             return;
         }
 
         try {
-            // Load sales data
-            loadSalesReport(startDate, endDate);
-
-            // Load product data
-            loadProductReport(startDate, endDate);
-
-            // Update charts
-            updateCharts(startDate, endDate);
-
-//            AlertHelper.showInformation("Success", "Report generated successfully!");
-
+            loadSalesReport(start, end);
+            loadProductReport(start, end);
+            updateCharts();
         } catch (SQLException e) {
-            e.printStackTrace();
-            AlertHelper.showError("Database Error", "Failed to generate report: " + e.getMessage());
+            AlertHelper.showError("Lỗi cơ sở dữ liệu", "Không thể tạo báo cáo: " + e.getMessage());
         }
     }
 
-    private void loadSalesReport(LocalDate startDate, LocalDate endDate) throws SQLException {
-        orderList.clear();
-        List<Order> orders = orderDAO.getOrdersByDateRange(startDate, endDate);
-        orderList.addAll(orders);
+    private void loadSalesReport(LocalDate start, LocalDate end) throws SQLException {
+        List<Order> orders = orderDAO.getOrdersByDateRange(start, end);
+        orderList.setAll(orders);
 
-        // Calculate statistics
-        double totalSales = orders.stream()
-                .mapToDouble(Order::getTotalAmount)
-                .sum();
+        double totalSales = orders.stream().mapToDouble(Order::getTotalAmount).sum();
         int totalOrders = orders.size();
-        double averageOrder = totalOrders > 0 ? totalSales / totalOrders : 0;
+        double avgOrder = totalOrders > 0 ? totalSales / totalOrders : 0;
 
-        totalSalesLabel.setText(String.format("$%.2f", totalSales));
+        totalSalesLabel.setText(String.format(new Locale("vi", "VN"), "%,.0f đ", totalSales));
         totalOrdersLabel.setText(String.valueOf(totalOrders));
-        averageOrderLabel.setText(String.format("$%.2f", averageOrder));
+        averageOrderLabel.setText(String.format(new Locale("vi", "VN"), "%,.0f đ", avgOrder));
+        salesTableView.refresh();
     }
 
-    private void loadProductReport(LocalDate startDate, LocalDate endDate) throws SQLException {
-        productReportList.clear();
+    private void loadProductReport(LocalDate start, LocalDate end) throws SQLException {
+        List<Order> orders = orderDAO.getOrdersByDateRange(start, end);
+        Map<Integer, ProductReport> map = new HashMap<>();
 
-        // Get product sales data from orders
-        Map<Integer, ProductReport> productSalesMap = new HashMap<>();
-        List<Order> orders = orderDAO.getOrdersByDateRange(startDate, endDate);
-
-        // Process each order and its items
         for (Order order : orders) {
             ObservableList<OrderItem> items = order.getItems();
+            if (items == null) continue;
 
-            if (items != null && !items.isEmpty()) {
-                for (OrderItem item : items) {
-                    int productId = item.getProductId();
-
-                    // Get or create product report
-                    ProductReport report = productSalesMap.get(productId);
-                    if (report == null) {
-                        report = new ProductReport(
-                                productId,
-                                item.getProductName(),
-                                0,
-                                0.0
-                        );
-                        productSalesMap.put(productId, report);
-                    }
-
-                    // Update quantities and revenue using subtotal
+            for (OrderItem item : items) {
+                map.compute(item.getProductId(), (id, report) -> {
+                    if (report == null)
+                        report = new ProductReport(id, item.getProductName(), 0, 0.0);
                     report.setQuantitySold(report.getQuantitySold() + item.getQuantity());
                     report.setRevenue(report.getRevenue() + item.getSubtotal());
-                }
+                    return report;
+                });
             }
         }
 
-        // Add to observable list and sort by revenue
-        productReportList.addAll(productSalesMap.values());
-        productReportList.sort((a, b) -> Double.compare(b.getRevenue(), a.getRevenue()));
+        productReportList.setAll(map.values().stream()
+                .sorted(Comparator.comparingDouble(ProductReport::getRevenue).reversed())
+                .collect(Collectors.toList()));
 
-        // Update statistics
-        if (!productReportList.isEmpty()) {
-            topProductLabel.setText(productReportList.get(0).getProductName());
-        } else {
-            topProductLabel.setText("N/A");
-        }
-
-        int totalProductsSold = productReportList.stream()
-                .mapToInt(ProductReport::getQuantitySold)
-                .sum();
-        totalProductsSoldLabel.setText(String.valueOf(totalProductsSold));
+        topProductLabel.setText(productReportList.isEmpty() ? "N/A" : productReportList.get(0).getProductName());
+        totalProductsSoldLabel.setText(String.valueOf(
+                productReportList.stream().mapToInt(ProductReport::getQuantitySold).sum()
+        ));
+        productTableView.refresh();
     }
 
-    private void updateCharts(LocalDate startDate, LocalDate endDate) throws SQLException {
-        updateBarChart(startDate, endDate);
-        updateLineChart(startDate, endDate);
+    // ========== Charts ==========
+    private void updateCharts() {
+        updateBarOrLineChart(salesBarChart);
+        updateBarOrLineChart(salesLineChart);
         updatePieChart();
     }
 
-    private void updateBarChart(LocalDate startDate, LocalDate endDate) throws SQLException {
-        salesBarChart.getData().clear();
-
+    private void updateBarOrLineChart(XYChart<String, Number> chart) {
+        chart.getData().clear();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Daily Sales");
-
-        // Aggregate sales by date (convert LocalDateTime to LocalDate)
         Map<LocalDate, Double> dailySales = new TreeMap<>();
+
         for (Order order : orderList) {
-            if (order.getCreatedAt() != null) {
-                LocalDate date = order.getCreatedAt().toLocalDate();
-                dailySales.put(date, dailySales.getOrDefault(date, 0.0) + order.getTotalAmount());
-            }
+            if (order.getCreatedAt() == null) continue;
+            LocalDate date = order.getCreatedAt().toLocalDate();
+            dailySales.merge(date, order.getTotalAmount(), Double::sum);
         }
 
-        // Add data to chart
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd");
-        for (Map.Entry<LocalDate, Double> entry : dailySales.entrySet()) {
-            series.getData().add(new XYChart.Data<>(
-                    entry.getKey().format(formatter),
-                    entry.getValue()
-            ));
-        }
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM");
+        dailySales.forEach((date, total) ->
+                series.getData().add(new XYChart.Data<>(date.format(fmt), total))
+        );
 
-        salesBarChart.getData().add(series);
-    }
-
-    private void updateLineChart(LocalDate startDate, LocalDate endDate) throws SQLException {
-        salesLineChart.getData().clear();
-
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Sales Trend");
-
-        // Aggregate sales by date (convert LocalDateTime to LocalDate)
-        Map<LocalDate, Double> dailySales = new TreeMap<>();
-        for (Order order : orderList) {
-            if (order.getCreatedAt() != null) {
-                LocalDate date = order.getCreatedAt().toLocalDate();
-                dailySales.put(date, dailySales.getOrDefault(date, 0.0) + order.getTotalAmount());
-            }
-        }
-
-        // Add data to chart
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd");
-        for (Map.Entry<LocalDate, Double> entry : dailySales.entrySet()) {
-            series.getData().add(new XYChart.Data<>(
-                    entry.getKey().format(formatter),
-                    entry.getValue()
-            ));
-        }
-
-        salesLineChart.getData().add(series);
+        series.setName("Doanh thu theo ngày");
+        chart.getData().add(series);
     }
 
     private void updatePieChart() {
         productPieChart.getData().clear();
-
-        // Show top 5 products by revenue
-        List<ProductReport> topProducts = productReportList.stream()
+        productReportList.stream()
                 .limit(5)
-                .collect(Collectors.toList());
-
-        for (ProductReport report : topProducts) {
-            productPieChart.getData().add(
-                    new PieChart.Data(
-                            report.getProductName() + " ($" + String.format("%.0f", report.getRevenue()) + ")",
-                            report.getRevenue()
-                    )
-            );
-        }
+                .forEach(p -> productPieChart.getData().add(
+                        new PieChart.Data(p.getProductName() + String.format(" (₫%,.0f)", p.getRevenue()), p.getRevenue())
+                ));
     }
 
     private void updateChartDisplay() {
-        String chartType = chartTypeComboBox.getValue();
-        if (chartType == null) return;
+        String type = chartTypeComboBox.getValue();
+        if (type == null) return;
 
-        // Hide all charts first
         salesBarChart.setVisible(false);
+        salesBarChart.setManaged(false);
         salesLineChart.setVisible(false);
+        salesLineChart.setManaged(false);
         productPieChart.setVisible(false);
+        productPieChart.setManaged(false);
 
-        // Show selected chart
-        switch (chartType) {
-            case "Bar Chart":
+        switch (type) {
+            case "Biểu đồ cột":
                 salesBarChart.setVisible(true);
+                salesBarChart.setManaged(true);
                 break;
-            case "Line Chart":
+
+            case "Biểu đồ đường":
                 salesLineChart.setVisible(true);
+                salesLineChart.setManaged(true);
                 break;
-            case "Pie Chart":
+
+            case "Biểu đồ tròn":
                 productPieChart.setVisible(true);
+                productPieChart.setManaged(true);
+                break;
+
+            default:
                 break;
         }
     }
 
-    private void updateDateRangeByType(String reportType) {
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate;
-
-        switch (reportType) {
-            case "Daily Sales":
-                startDate = endDate;
+    private void updateDateRangeByType(String type) {
+        LocalDate end = LocalDate.now(), start = end;
+        switch (type) {
+            case "Bán hàng theo tuần":
+                start = end.minusWeeks(1);
                 break;
-            case "Weekly Sales":
-                startDate = endDate.minusWeeks(1);
+            case "Bán hàng theo tháng":
+                start = end.minusMonths(1);
                 break;
-            case "Monthly Sales":
-                startDate = endDate.minusMonths(1);
-                break;
-            case "Product Performance":
-                startDate = endDate.minusMonths(3);
+            case "Hiệu suất sản phẩm":
+                start = end.minusMonths(3);
                 break;
             default:
-                return;
+                break;
         }
-
-        startDatePicker.setValue(startDate);
-        endDatePicker.setValue(endDate);
+        startDatePicker.setValue(start);
+        endDatePicker.setValue(end);
         generateReport();
     }
 
+    // ========== Export Excel ==========
     @FXML
     private void exportReport() {
-        // TODO: Implementation for exporting report to CSV/PDF
-//        AlertHelper.showInformation("Export", "Export functionality to be implemented.");
-    }
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Lưu báo cáo Excel");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+        chooser.setInitialFileName("BaoCao_" + LocalDate.now() + ".xlsx");
 
-    // Inner class for Product Report
-    public static class ProductReport {
-        private int productId;
-        private String productName;
-        private int quantitySold;
-        private double revenue;
+        var file = chooser.showSaveDialog(exportButton.getScene().getWindow());
+        if (file == null) return;
 
-        public ProductReport(int productId, String productName, int quantitySold, double revenue) {
-            this.productId = productId;
-            this.productName = productName;
-            this.quantitySold = quantitySold;
-            this.revenue = revenue;
-        }
+        try (Workbook wb = new XSSFWorkbook()) {
+            CellStyle headerStyle = createHeaderStyle(wb);
+            DataFormat df = wb.createDataFormat();
+            CellStyle currencyStyle = wb.createCellStyle();
+            currencyStyle.setDataFormat(df.getFormat("\"₫\"#,##0"));
+            currencyStyle.setAlignment(HorizontalAlignment.RIGHT);
 
-        // Getters and Setters
-        public int getProductId() {
-            return productId;
-        }
+            // Sheet 1: Sales
+            Sheet salesSheet = wb.createSheet("Doanh số bán hàng");
+            createHeaderRow(salesSheet, headerStyle, "Mã đơn hàng", "Ngày tạo", "Nhân viên", "Tổng tiền (₫)");
+            int row = 1;
+            for (Order order : orderList) {
+                Row r = salesSheet.createRow(row++);
+                r.createCell(0).setCellValue(order.getId());
+                r.createCell(1).setCellValue(order.getCreatedAt() != null
+                        ? order.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                        : "");
+                r.createCell(2).setCellValue("EMP-" + order.getEmployeeId());
+                org.apache.poi.ss.usermodel.Cell money = r.createCell(3);
+                money.setCellValue(order.getTotalAmount());
+                money.setCellStyle(currencyStyle);
+            }
+            for (int i = 0; i < 4; i++) salesSheet.autoSizeColumn(i);
 
-        public void setProductId(int productId) {
-            this.productId = productId;
-        }
+            // Sheet 2: Product
+            Sheet productSheet = wb.createSheet("Hiệu suất sản phẩm");
+            createHeaderRow(productSheet, headerStyle, "Tên sản phẩm", "Số lượng bán", "Doanh thu (₫)");
+            row = 1;
+            for (ProductReport pr : productReportList) {
+                Row r = productSheet.createRow(row++);
+                r.createCell(0).setCellValue(pr.getProductName());
+                r.createCell(1).setCellValue(pr.getQuantitySold());
+                org.apache.poi.ss.usermodel.Cell rev = r.createCell(2);
+                rev.setCellValue(pr.getRevenue());
+                rev.setCellStyle(currencyStyle);
+            }
+            for (int i = 0; i < 3; i++) productSheet.autoSizeColumn(i);
 
-        public String getProductName() {
-            return productName;
-        }
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                wb.write(fos);
+            }
 
-        public void setProductName(String productName) {
-            this.productName = productName;
-        }
-
-        public int getQuantitySold() {
-            return quantitySold;
-        }
-
-        public void setQuantitySold(int quantitySold) {
-            this.quantitySold = quantitySold;
-        }
-
-        public double getRevenue() {
-            return revenue;
-        }
-
-        public void setRevenue(double revenue) {
-            this.revenue = revenue;
-        }
-
-        @Override
-        public String toString() {
-            return "ProductReport{" +
-                    "productId=" + productId +
-                    ", productName='" + productName + '\'' +
-                    ", quantitySold=" + quantitySold +
-                    ", revenue=" + revenue +
-                    '}';
+            AlertHelper.showInfo("Xuất Excel thành công", "Báo cáo đã được lưu tại:\n" + file.getAbsolutePath());
+        } catch (IOException e) {
+            AlertHelper.showError("Lỗi xuất file", "Không thể ghi file Excel: " + e.getMessage());
         }
     }
+
+    private CellStyle createHeaderStyle(Workbook wb) {
+        CellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        return style;
+    }
+
+    private void createHeaderRow(Sheet sheet, CellStyle style, String... headers) {
+        Row row = sheet.createRow(0);
+        for (int i = 0; i < headers.length; i++) {
+            org.apache.poi.ss.usermodel.Cell cell = row.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(style);
+        }
+    }
+
 }
-
